@@ -176,3 +176,54 @@
     }
   }
 </style>
+
+<script>
+  let isAnimating = false;
+  let pullDeltaX = 0; // distance that card is swipping
+
+  function startDrag(evt) {
+    if (isAnimating) return;
+
+    // get the first article element
+    const actualCard = evt.target.closest('article');
+
+    // get initial position of mouse or finger
+    const startX = evt.pageX ?? evt.touches[0].pageX;
+
+    // listen the mouse and touch movements
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onEnd);
+
+    document.addEventListener('touchmove', onMove, { passive: true });
+    document.addEventListener('touchend', onEnd, { passive: true });
+
+    function onMove(evt) {
+      // current position of mouse or finger
+      const currentX = evt.pageX ?? evt.touches[0].pageX;
+      // distance between initial and current position
+      pullDeltaX = currentX - startX;
+      // if no distance
+      if (pullDeltaX === 0) return;
+      // change the flag to indicate we are animating
+      isAnimating = true;
+      // calculate the rotation of the card using the distance
+      const deg = pullDeltaX / 14;
+      // apply the transformation to the card
+      actualCard.style.transform = `translateX(${pullDeltaX}px) rotate(${deg}deg)`;
+      // change the cursor to grabbing
+      actualCard.style.cursor = 'grabbing';
+    }
+
+    function onEnd(evt) {
+      // remove the event listeners
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onEnd);
+
+      document.removeEventListener('touchmove', onMove);
+      document.removeEventListener('touchend', onEnd);
+    }
+  }
+
+  document.addEventListener('mousedown', startDrag);
+  document.addEventListener('touchstart', startDrag, { passive: true });
+</script>
